@@ -80,7 +80,7 @@ func (this *Client) Info() (*Info, error) {
 	return info, nil
 }
 
-// Run ...
+// Run 运行命令
 func (this *Client) Run(args ...string) ([]byte, error) {
 	ops := []string{"--username", this.username, "--password", this.password}
 	args = append(args, ops...)
