@@ -1,4 +1,4 @@
-package svn
+package gosvn
 
 import "encoding/xml"
 

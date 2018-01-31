@@ -1,4 +1,4 @@
-package svn
+package gosvn
 
 import (
 	"encoding/xml"
@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-type Client struct {
+type client struct {
 	username string
 	password string
 	svnUrl   string
@@ -15,17 +15,17 @@ type Client struct {
 }
 
 // NewClient
-func NewClient(username, password, url string) *Client {
-	return &Client{username: username, password: password, svnUrl: url}
+func NewClient(username, password, url string) *client {
+	return &client{username: username, password: password, svnUrl: url}
 }
 
 // NewClientWithEnv ...
-func NewClientWithEnv(username, password, url string, env []string) *Client {
-	return &Client{username: username, password: password, svnUrl: url, Env: env}
+func NewClientWithEnv(username, password, url string, env []string) *client {
+	return &client{username: username, password: password, svnUrl: url, Env: env}
 }
 
 // log ...
-func (this *Client) log(cmd string) (*logEntry, error) {
+func (this *client) log(cmd string) (*logEntry, error) {
 	out, err := this.Run(cmd)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (this *Client) log(cmd string) (*logEntry, error) {
 }
 
 // checkout
-func (this *Client) checkout() (string, error) {
+func (this *client) checkout() (string, error) {
 	cmd := []string{"checkout", this.svnUrl}
 	if this.svnDir != "" {
 		cmd = append(cmd, this.svnDir)
@@ -52,7 +52,7 @@ func (this *Client) checkout() (string, error) {
 }
 
 // client checkout from specific revision
-func (this *Client) checkoutWithRevision(revision string) (string, error) {
+func (this *client) checkoutWithRevision(revision string) (string, error) {
 	cmd := []string{"checkout", this.svnUrl}
 	if this.svnDir != "" {
 		cmd = append(cmd, this.svnDir)
@@ -66,7 +66,7 @@ func (this *Client) checkoutWithRevision(revision string) (string, error) {
 }
 
 // info ...
-func (this *Client) Info() (*Info, error) {
+func (this *client) Info() (*Info, error) {
 	cmd := []string{"info", this.svnUrl, "--xml"}
 	out, err := this.Run(cmd...)
 	if err != nil {
@@ -81,7 +81,7 @@ func (this *Client) Info() (*Info, error) {
 }
 
 // Run 运行命令
-func (this *Client) Run(args ...string) ([]byte, error) {
+func (this *client) Run(args ...string) ([]byte, error) {
 	ops := []string{"--username", this.username, "--password", this.password}
 	args = append(args, ops...)
 	cmd := exec.Command("svn", args...)
