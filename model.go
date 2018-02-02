@@ -3,24 +3,27 @@ package gosvn
 import "encoding/xml"
 
 type log struct {
-	XMLName  xml.Name   `xml:"log`
-	logEntry []logEntry `xml:logentry`
+	XMLName  xml.Name   `xml:"log"`
+	LogEntry []logEntry `xml:"logentry"`
 }
 
 type logEntry struct {
-	XMLAttr xml.Attr `xml:"revision"`
-	Msg     string   `xml:"msg"`
-	Author  string   `xml:"author"`
-	Date    string   `xml:"date`
-	Paths   path     `xml:"paths`
+	Revision string `xml:"revision,attr"`
+	Msg      string `xml:"msg"`
+	Author   string `xml:"author"`
+	Date     string `xml:"date"`
+	Paths    paths  `xml:"paths>path"`
+}
+
+type paths struct {
+	Path     string `xml:",innerxml"`
+	Action   string `xml:"action,attr"`
+	PropMods string `xml:"prop-mods,attr"`
+	TextMods string `xml:"text-mods,attr"`
+	Kind     string `xml:"kind,attr"`
 }
 
 type path struct {
-	Path     []string `xml:path`
-	Action   string   `xml:"action,attr"`
-	Propmods string   `xml:"prop-mods,attr"`
-	Textmods string   `xml:"text-mods,attr"`
-	Kind     string   `xml:"kind,attr"`
 }
 
 type Info struct {
@@ -39,4 +42,21 @@ type commit struct {
 	Revision string `xml:"revision,attr"`
 	Author   string `xml:"author"`
 	Date     string `xml:"date"`
+}
+
+type lists struct {
+	XMLName xml.Name `xml:"lists"`
+	List    list     `xml:"list"`
+}
+
+type list struct {
+	Path  string  `xml:"path,attr"`
+	Entry []entry `xml:"entry"`
+}
+
+type entry struct {
+	Kind   string `xml:"kind,attr"`
+	Name   string `xml:"name"`
+	Size   string `xml:"size"`
+	Commit commit `xml:"commit"`
 }
