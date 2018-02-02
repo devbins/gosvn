@@ -25,21 +25,21 @@ func NewClientWithEnv(username, password, url string, env []string) *client {
 }
 
 // Log ...
-func (this *client) Log(cmd string) (*logEntry, error) {
-	out, err := this.run(cmd)
+func (this *client) Log() (*log, error) {
+	out, err := this.run("log", this.svnUrl, "--xml", "-v")
 	if err != nil {
 		return nil, err
 	}
-	log := new(logEntry)
-	err = xml.Unmarshal(out, log)
+	l := new(log)
+	err = xml.Unmarshal(out, l)
 	if err != nil {
 		return nil, err
 	}
-	return log, nil
+	return l, nil
 }
 
 // list ...
-func (this *client) list() (*lists, error) {
+func (this *client) List() (*lists, error) {
 	cmd := []string{"list", this.svnUrl, "--xml"}
 	out, err := this.run(cmd...)
 	if err != nil {
