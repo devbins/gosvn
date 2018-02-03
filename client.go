@@ -74,8 +74,8 @@ func (this *client) List() (*lists, error) {
 }
 
 // Checkout
-func (this *client) Checkout() (string, error) {
-	cmd := []string{"checkout", this.svnUrl}
+func (this *client) Checkout(dir string) (string, error) {
+	cmd := []string{"checkout", this.svnUrl, dir}
 	if this.svnDir != "" {
 		cmd = append(cmd, this.svnDir)
 	}
