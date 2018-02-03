@@ -24,6 +24,15 @@ func NewClientWithEnv(username, password, url string, env []string) *client {
 	return &client{username: username, password: password, svnUrl: url, Env: env}
 }
 
+// Cat ...
+func (this *client) Cat(file string) (string, error) {
+	out, err := this.run("cat", this.svnUrl+"/"+file)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
 // Export ...
 func (this *client) Export(dir string) error {
 	_, err := this.run("export", this.svnUrl, dir)
