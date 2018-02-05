@@ -2,6 +2,7 @@ package gosvn
 
 import (
 	"encoding/xml"
+	"fmt"
 	"os"
 	"os/exec"
 )
@@ -22,6 +23,16 @@ func NewClient(username, password, url string) *client {
 // NewClientWithEnv ...
 func NewClientWithEnv(username, password, url string, env []string) *client {
 	return &client{username: username, password: password, svnUrl: url, Env: env}
+}
+
+// Diff ...
+func (this *client) Diff(start, end int) (string, error) {
+	r := fmt.Sprintf("%d:%d", start, end)
+	out, err := this.run("diff", "-r", r, this.svnUrl)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 // Cat ...
@@ -74,8 +85,8 @@ func (this *client) List() (*lists, error) {
 }
 
 // Checkout
-func (this *client) Checkout(dir string) (string, error) {
-	cmd := []string{"checkout", this.svnUrl, dir}
+func (this *client) Checkout() (string, error) {
+	cmd := []string{"checkout", this.svnUrl}
 	if this.svnDir != "" {
 		cmd = append(cmd, this.svnDir)
 	}
@@ -117,12 +128,13 @@ func (this *client) Info() (*Info, error) {
 
 // run 运行命令
 func (this *client) run(args ...string) ([]byte, error) {
-	ops := []string{"--username", this.username, "--password", this.password}
+	ops := []string{"--username", this.username, "--password", this.password, "--non-interactive", "--trust-server-cert"}
 	args = append(args, ops...)
 	cmd := exec.Command("svn", args...)
 	if len(this.Env) > 0 {
 		cmd.Env = append(os.Environ(), this.Env...)
 	}
+	cmd.Dir = this.svnDir
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
