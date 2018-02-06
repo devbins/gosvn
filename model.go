@@ -23,9 +23,6 @@ type paths struct {
 	Kind     string `xml:"kind,attr"`
 }
 
-type path struct {
-}
-
 type Info struct {
 	XMLName       xml.Name `xml:"info"`
 	Url           string   `xml:"entry>url"`
@@ -59,4 +56,14 @@ type entry struct {
 	Name   string `xml:"name"`
 	Size   string `xml:"size"`
 	Commit commit `xml:"commit"`
+}
+
+type diff struct {
+	Paths []diffPath `xml:"paths>path"`
+}
+type diffPath struct {
+	Props string `xml:"props,attr"`
+	Kind  string `xml:"kind,attr"`
+	Item  string `xml:"item,attr"`
+	Path  string `xml:",innerxml"`
 }
