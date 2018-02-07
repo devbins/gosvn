@@ -67,3 +67,17 @@ type diffPath struct {
 	Item  string `xml:"item,attr"`
 	Path  string `xml:",innerxml"`
 }
+
+type status struct {
+	XMLName xml.Name `xml:"status"`
+	Target  target   `xml:"target"`
+}
+type target struct {
+	Path  string      `xml:"path,attr"`
+	Entry statusEntry `xml:"entry"`
+}
+type statusEntry struct {
+	Path          string `xml:"path,attr"`
+	WcStatusItem  string `xml:"wc-status>item,attr"`
+	WcStatusProps string `xml:"wc-status>props,attr"`
+}
