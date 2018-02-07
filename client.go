@@ -20,6 +20,16 @@ func NewClient(username, password, url, workDir string) *client {
 	return &client{username: username, password: password, svnUrl: url}
 }
 
+// Update ...
+func (this *client) Update() (string, error) {
+	out, err := this.run("update")
+	if err != nil {
+		return "", err
+	}
+	return string(out), err
+
+}
+
 // Commit ...
 func (this *client) Commit(msg string) (string, error) {
 	out, err := this.run("commit", "-m", msg)
