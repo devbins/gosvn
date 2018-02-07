@@ -20,6 +20,15 @@ func NewClient(username, password, url, workDir string) *client {
 	return &client{username: username, password: password, svnUrl: url}
 }
 
+// Cleanup ...
+func (this *client) Cleanup() error {
+	_, err := this.run("cleanup")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Update ...
 func (this *client) Update() (string, error) {
 	out, err := this.run("update")
