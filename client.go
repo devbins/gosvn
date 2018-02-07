@@ -16,13 +16,17 @@ type client struct {
 }
 
 // NewClient
-func NewClient(username, password, url string) *client {
+func NewClient(username, password, url, workDir string) *client {
 	return &client{username: username, password: password, svnUrl: url}
 }
 
-// NewClientWithEnv ...
-func NewClientWithEnv(username, password, url string, env []string) *client {
-	return &client{username: username, password: password, svnUrl: url, Env: env}
+// Commit ...
+func (this *client) Commit(msg string) (string, error) {
+	out, err := this.run("commit", "-m", msg)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 // Add ...
