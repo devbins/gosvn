@@ -25,6 +25,31 @@ func NewClientWithEnv(username, password, url string, env []string) *client {
 	return &client{username: username, password: password, svnUrl: url, Env: env}
 }
 
+// Add ...
+func (this *client) Add(file string) (string, error) {
+	out, err := this.run("add", file)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+
+}
+
+// Status ...
+func (this *client) Status() (*status, error) {
+	out, err := this.run("status", "--xml")
+	if err != nil {
+		return nil, err
+	}
+	s := new(status)
+	err = xml.Unmarshal(out, s)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+
+}
+
 // DiffSummary ...
 func (this *client) DiffSummary(start, end int) (*diffPath, error) {
 	r := fmt.Sprintf("%d:%d", start, end)
