@@ -17,7 +17,7 @@ type client struct {
 
 // NewClient
 func NewClient(username, password, url, workDir string) *client {
-	return &client{username: username, password: password, svnUrl: url}
+	return &client{username: username, password: password, svnUrl: url, svnDir: workDir}
 }
 
 // Cleanup ...
@@ -149,29 +149,25 @@ func (this *client) List() (*lists, error) {
 }
 
 // Checkout
-func (this *client) Checkout() (string, error) {
-	cmd := []string{"checkout", this.svnUrl}
-	if this.svnDir != "" {
-		cmd = append(cmd, this.svnDir)
-	}
+func (this *client) Checkout(dir string) (string, error) {
+	cmd := []string{"checkout", this.svnUrl, dir}
 	out, err := this.run(cmd...)
 	if err != nil {
 		return "", err
 	}
+	this.svnDir = dir
 	return string(out), nil
 }
 
 // client Checkout from specific revision
-func (this *client) CheckoutWithRevision(revision string) (string, error) {
-	cmd := []string{"checkout", this.svnUrl}
-	if this.svnDir != "" {
-		cmd = append(cmd, this.svnDir)
-	}
+func (this *client) CheckoutWithRevision(dir string, revision string) (string, error) {
+	cmd := []string{"checkout", this.svnUrl, dir}
 	cmd = append(cmd, "-r", revision)
 	out, err := this.run(cmd...)
 	if err != nil {
 		return "", err
 	}
+	this.svnDir = dir
 	return string(out), nil
 }
 
@@ -192,13 +188,26 @@ func (this *client) Info() (*Info, error) {
 
 // run 运行命令
 func (this *client) run(args ...string) ([]byte, error) {
-	ops := []string{"--username", this.username, "--password", this.password, "--non-interactive", "--trust-server-cert"}
+	ops := []string{"--non-interactive", "--trust-server-cert"}
+
+	if this.username != "" {
+		args = append(args, "--username", this.username)
+	}
+
+	if this.password != "" {
+		args = append(args, "--password", this.password)
+	}
+
 	args = append(args, ops...)
 	cmd := exec.Command("svn", args...)
 	if len(this.Env) > 0 {
 		cmd.Env = append(os.Environ(), this.Env...)
 	}
-	cmd.Dir = this.svnDir
+
+	if this.svnDir != "" {
+		cmd.Dir = this.svnDir
+	}
+
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
