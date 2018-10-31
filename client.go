@@ -3,8 +3,10 @@ package gosvn
 import (
 	"encoding/xml"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 type client struct {
@@ -17,7 +19,13 @@ type client struct {
 
 // NewClient
 func NewClient(username, password, url, workDir string) *client {
-	return &client{username: username, password: password, svnUrl: url, svnDir: workDir}
+
+	path, err := filepath.Abs(workDir)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(path)
+	return &client{username: username, password: password, svnUrl: url, svnDir: path}
 }
 
 // Cleanup ...
@@ -119,12 +127,12 @@ func (this *client) Export(dir string) error {
 }
 
 // Log ...
-func (this *client) Log() (*log, error) {
+func (this *client) Log() (*SvnLog, error) {
 	out, err := this.run("log", this.svnUrl, "--xml", "-v")
 	if err != nil {
 		return nil, err
 	}
-	l := new(log)
+	l := new(SvnLog)
 	err = xml.Unmarshal(out, l)
 	if err != nil {
 		return nil, err
@@ -149,25 +157,23 @@ func (this *client) List() (*lists, error) {
 }
 
 // Checkout
-func (this *client) Checkout(dir string) (string, error) {
-	cmd := []string{"checkout", this.svnUrl, dir}
+func (this *client) Checkout() (string, error) {
+	cmd := []string{"checkout", this.svnUrl, this.svnDir}
 	out, err := this.run(cmd...)
 	if err != nil {
 		return "", err
 	}
-	this.svnDir = dir
 	return string(out), nil
 }
 
 // client Checkout from specific revision
-func (this *client) CheckoutWithRevision(dir string, revision string) (string, error) {
-	cmd := []string{"checkout", this.svnUrl, dir}
+func (this *client) CheckoutWithRevision(revision string) (string, error) {
+	cmd := []string{"checkout", this.svnUrl, this.svnDir}
 	cmd = append(cmd, "-r", revision)
 	out, err := this.run(cmd...)
 	if err != nil {
 		return "", err
 	}
-	this.svnDir = dir
 	return string(out), nil
 }
 
@@ -199,17 +205,24 @@ func (this *client) run(args ...string) ([]byte, error) {
 	}
 
 	args = append(args, ops...)
+
+	log.Println("cmd args:", args)
+
 	cmd := exec.Command("svn", args...)
 	if len(this.Env) > 0 {
 		cmd.Env = append(os.Environ(), this.Env...)
 	}
 
 	if this.svnDir != "" {
-		cmd.Dir = this.svnDir
+		if _, err := os.Stat(this.svnDir); err == nil {
+			cmd.Dir = this.svnDir
+			log.Printf("cmd dir %s \n", cmd.Dir)
+		}
 	}
 
 	out, err := cmd.Output()
 	if err != nil {
+		log.Println("cmd err:", string(out), err)
 		return nil, err
 	}
 	return out, nil
