@@ -2,7 +2,7 @@ package gosvn
 
 import "encoding/xml"
 
-type log struct {
+type SvnLog struct {
 	XMLName  xml.Name   `xml:"log"`
 	LogEntry []logEntry `xml:"logentry"`
 }
