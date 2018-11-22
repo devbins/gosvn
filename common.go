@@ -9,7 +9,7 @@ import (
 )
 
 type CommonClient struct {
-	UrlOrPath string
+	URLOrPath string
 	Username  string
 	Password  string
 	TrustCert bool
@@ -18,7 +18,7 @@ type CommonClient struct {
 
 // NewCommonClient ...
 func NewCommonClient(urlOrPath, username, password string) *CommonClient {
-	return &CommonClient{UrlOrPath: urlOrPath, Username: username, Password: password}
+	return &CommonClient{URLOrPath: urlOrPath, Username: username, Password: password}
 }
 
 // RunCmd ...
@@ -48,7 +48,7 @@ func (client *CommonClient) RunCmd(args ...string) ([]byte, error) {
 
 // info ...
 func (client *CommonClient) Info() (*Info, error) {
-	output, err := client.RunCmd("info", "--xml", client.UrlOrPath)
+	output, err := client.RunCmd("info", "--xml", client.URLOrPath)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (client *CommonClient) Info() (*Info, error) {
 
 // Log ...
 func (client *CommonClient) Log() (*SvnLog, error) {
-	output, err := client.RunCmd("log", client.UrlOrPath, "--xml", "-v")
+	output, err := client.RunCmd("log", client.URLOrPath, "--xml", "-v")
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (client *CommonClient) Properties() ([]byte, error) {
 
 // Cat ...
 func (client *CommonClient) Cat(file string) (string, error) {
-	filePath := filepath.Join(client.UrlOrPath, file)
+	filePath := filepath.Join(client.URLOrPath, file)
 	out, err := client.RunCmd("cat", filePath)
 	if err != nil {
 		return "", err
@@ -116,7 +116,7 @@ func (client *CommonClient) Cat(file string) (string, error) {
 
 // List ...
 func (client *CommonClient) List() (*lists, error) {
-	out, err := client.RunCmd("ls", "--xml", client.UrlOrPath)
+	out, err := client.RunCmd("ls", "--xml", client.URLOrPath)
 	if err != nil {
 		log.Println("error:", err)
 		return nil, err
