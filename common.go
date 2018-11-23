@@ -17,13 +17,18 @@ type CommonClient struct {
 }
 
 // NewCommonClient ...
-func NewCommonClient(urlOrPath, username, password string) *CommonClient {
-	return &CommonClient{URLOrPath: urlOrPath, Username: username, Password: password}
+func NewCommonClient(urlOrPath, username, password string, trustCert bool) *CommonClient {
+	return &CommonClient{URLOrPath: urlOrPath, Username: username, Password: password, TrustCert: trustCert}
 }
 
 // RunCmd ...
 func (client *CommonClient) RunCmd(args ...string) ([]byte, error) {
 	args = append(args, "--non-interactive")
+
+	if client.TrustCert {
+		args = append(args,"--trust-server-cert")
+	}
+
 	if client.Username != "" && client.Password != "" {
 		args = append(args, "--username", client.Username)
 		args = append(args, "--password", client.Password)
@@ -96,7 +101,7 @@ func (client *CommonClient) Status() (*status, error) {
 
 // Properties ...
 func (client *CommonClient) Properties() ([]byte, error) {
-	out, err := client.RunCmd("proplist", "--xml")
+	out, err := client.RunCmd("proplist", "--xml",client.URLOrPath)
 	if err != nil {
 		return nil, err
 	}
