@@ -83,15 +83,6 @@ func (this *client) Status() (*status, error) {
 
 
 
-// Diff ...
-func (this *client) Diff(start, end int) (string, error) {
-	r := fmt.Sprintf("%d:%d", start, end)
-	out, err := this.run("diff", "-r", r, this.svnUrl)
-	if err != nil {
-		return "", err
-	}
-	return string(out), nil
-}
 
 // Cat ...
 func (this *client) Cat(file string) (string, error) {

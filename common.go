@@ -136,6 +136,19 @@ func (client *CommonClient) List() (*lists, error) {
 	return ls, nil
 }
 
+
+// Diff ...
+func (client *CommonClient) Diff(start, end int) (string, error) {
+	r := fmt.Sprintf("%d:%d", start, end)
+	out, err := client.RunCmd("diff", "-r", r, client.URLOrPath)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+
+
 // DiffSummary ...
 func (client *CommonClient) DiffSummary(start, end int) (*diffPath, error) {
 	r := fmt.Sprintf("%d:%d", start, end)
