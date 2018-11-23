@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"fmt"
 )
 
 type CommonClient struct {
@@ -133,4 +134,19 @@ func (client *CommonClient) List() (*lists, error) {
 		return nil, err
 	}
 	return ls, nil
+}
+
+// DiffSummary ...
+func (client *CommonClient) DiffSummary(start, end int) (*diffPath, error) {
+	r := fmt.Sprintf("%d:%d", start, end)
+	out, err := client.RunCmd("diff", "-r", r, client.URLOrPath, "--xml", "--summarize")
+	if err != nil {
+		return nil, err
+	}
+	dp := new(diffPath)
+	err = xml.Unmarshal(out, dp)
+	if err != nil {
+		return nil, err
+	}
+	return dp, nil
 }

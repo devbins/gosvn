@@ -81,21 +81,7 @@ func (this *client) Status() (*status, error) {
 
 }
 
-// DiffSummary ...
-func (this *client) DiffSummary(start, end int) (*diffPath, error) {
-	r := fmt.Sprintf("%d:%d", start, end)
-	out, err := this.run("diff", "-r", r, this.svnUrl, "--xml", "--summarize")
-	if err != nil {
-		return nil, err
-	}
-	dp := new(diffPath)
-	err = xml.Unmarshal(out, dp)
-	if err != nil {
-		return nil, err
-	}
-	return dp, nil
 
-}
 
 // Diff ...
 func (this *client) Diff(start, end int) (string, error) {
