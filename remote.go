@@ -1,5 +1,10 @@
 package gosvn
 
+import (
+	"strings"
+	"errors"
+)
+
 type RemoteClient struct {
 	*CommonClient
 }
@@ -11,7 +16,12 @@ func NewRemoteClient(url, username, password string) *RemoteClient {
 
 // CheckOut ...
 func (remoteClient *RemoteClient) CheckOut(dir string) error {
-	_, err := remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir)
+	err := validDir(dir)
+	if err != nil {
+		return err
+	}
+
+	_, err = remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir)
 	if err != nil {
 		return err
 	}
@@ -20,8 +30,23 @@ func (remoteClient *RemoteClient) CheckOut(dir string) error {
 
 // CheckOutWithRevision ...
 func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int) error {
-	_, err := remoteClient.RunCmd("checkout", dir, "-r", string(revision), remoteClient.URLOrPath)
+	err := validDir(dir)
 	if err != nil {
+		return err
+	}
+
+	_, err = remoteClient.RunCmd("checkout", dir, "-r", string(revision), remoteClient.URLOrPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+// validDir ...
+func validDir(dir string) error {
+	if !strings.HasPrefix(dir, "/") {
+		err := errors.New("Checkout dir must start with /")
 		return err
 	}
 	return nil
