@@ -16,7 +16,7 @@ func NewRemoteClient(url, username, password string) *RemoteClient {
 
 // CheckOut ...
 func (remoteClient *RemoteClient) CheckOut(dir string) error {
-	err := validDir(dir)
+	err := verifyDir(dir)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (remoteClient *RemoteClient) CheckOut(dir string) error {
 
 // CheckOutWithRevision ...
 func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int) error {
-	err := validDir(dir)
+	err := verifyDir(dir)
 	if err != nil {
 		return err
 	}
@@ -43,8 +43,8 @@ func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int)
 }
 
 
-// validDir ...
-func validDir(dir string) error {
+// verifyDir ...
+func verifyDir(dir string) error {
 	if !strings.HasPrefix(dir, "/") {
 		err := errors.New("Checkout dir must start with /")
 		return err
