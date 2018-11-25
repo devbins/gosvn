@@ -1,12 +1,17 @@
 package gosvn
 
-type remoteClient struct {
-	CommonClient
+type RemoteClient struct {
+	*CommonClient
+}
+
+// NewRemoteClient ...
+func NewRemoteClient(url, username, password string) *RemoteClient {
+	return &RemoteClient{CommonClient: NewCommonClient(url, username, password)}
 }
 
 // CheckOut ...
-func (remoteClient *remoteClient) CheckOut(dir string) error {
-	_, err := remoteClient.RunCmd("checkout", dir, "--xml", remoteClient.URLOrPath)
+func (remoteClient *RemoteClient) CheckOut(dir string) error {
+	_, err := remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir)
 	if err != nil {
 		return err
 	}
@@ -14,8 +19,8 @@ func (remoteClient *remoteClient) CheckOut(dir string) error {
 }
 
 // CheckOutWithRevision ...
-func (remoteClient *remoteClient) CheckOutWithRevision(dir string, revision int) error {
-	_, err := remoteClient.RunCmd("checkout", dir, "-r", string(revision), "--xml", remoteClient.URLOrPath)
+func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int) error {
+	_, err := remoteClient.RunCmd("checkout", dir, "-r", string(revision), remoteClient.URLOrPath)
 	if err != nil {
 		return err
 	}
