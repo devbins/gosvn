@@ -1,8 +1,9 @@
 package gosvn
 
 import (
-	"strings"
 	"errors"
+	"strings"
+	"strconv"
 )
 
 type RemoteClient struct {
@@ -11,7 +12,7 @@ type RemoteClient struct {
 
 // NewRemoteClient ...
 func NewRemoteClient(url, username, password string) *RemoteClient {
-	return &RemoteClient{CommonClient: NewCommonClient(url, username, password)}
+	return &RemoteClient{CommonClient: NewCommonClient(url, username, password, false)}
 }
 
 // CheckOut ...
@@ -35,13 +36,12 @@ func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int)
 		return err
 	}
 
-	_, err = remoteClient.RunCmd("checkout", dir, "-r", string(revision), remoteClient.URLOrPath)
+	_, err = remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir, "-r", strconv.Itoa(revision))
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
 
 // verifyDir ...
 func verifyDir(dir string) error {
