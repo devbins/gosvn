@@ -2,11 +2,12 @@ package gosvn
 
 import (
 	"encoding/xml"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"fmt"
+	"strings"
 )
 
 type CommonClient struct {
@@ -22,12 +23,12 @@ func NewCommonClient(urlOrPath, username, password string, trustCert bool) *Comm
 	return &CommonClient{URLOrPath: urlOrPath, Username: username, Password: password, TrustCert: trustCert}
 }
 
-// RunCmd ...
-func (client *CommonClient) RunCmd(args ...string) ([]byte, error) {
+// runCmd ...
+func (client *CommonClient) runCmd(args ...string) ([]byte, error) {
 	args = append(args, "--non-interactive")
 
 	if client.TrustCert {
-		args = append(args,"--trust-server-cert")
+		args = append(args, "--trust-server-cert")
 	}
 
 	if client.Username != "" && client.Password != "" {
@@ -35,11 +36,15 @@ func (client *CommonClient) RunCmd(args ...string) ([]byte, error) {
 		args = append(args, "--password", client.Password)
 	}
 
-	log.Println(args)
-
 	cmd := exec.Command("svn", args...)
 	if len(client.Env) > 0 {
 		cmd.Env = append(os.Environ(), client.Env...)
+	}
+
+	if strings.HasPrefix(client.URLOrPath, "/") {
+		if _, err := os.Stat(client.URLOrPath); err == nil {
+			cmd.Dir = client.URLOrPath
+		}
 	}
 
 	output, err := cmd.Output()
@@ -54,7 +59,7 @@ func (client *CommonClient) RunCmd(args ...string) ([]byte, error) {
 
 // info ...
 func (client *CommonClient) Info() (*Info, error) {
-	output, err := client.RunCmd("info", "--xml", client.URLOrPath)
+	output, err := client.runCmd("info", "--xml", client.URLOrPath)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +75,7 @@ func (client *CommonClient) Info() (*Info, error) {
 
 // Log ...
 func (client *CommonClient) Log() (*SvnLog, error) {
-	output, err := client.RunCmd("log", client.URLOrPath, "--xml", "-v")
+	output, err := client.runCmd("log", client.URLOrPath, "--xml", "-v")
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +92,7 @@ func (client *CommonClient) Log() (*SvnLog, error) {
 
 // Status ...
 func (client *CommonClient) Status() (*status, error) {
-	output, err := client.RunCmd("status", "--xml")
+	output, err := client.runCmd("status", "--xml")
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +107,7 @@ func (client *CommonClient) Status() (*status, error) {
 
 // Properties ...
 func (client *CommonClient) Properties() ([]byte, error) {
-	out, err := client.RunCmd("proplist", "--xml",client.URLOrPath)
+	out, err := client.runCmd("proplist", "--xml", client.URLOrPath)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +118,7 @@ func (client *CommonClient) Properties() ([]byte, error) {
 // Cat ...
 func (client *CommonClient) Cat(file string) (string, error) {
 	filePath := filepath.Join(client.URLOrPath, file)
-	out, err := client.RunCmd("cat", filePath)
+	out, err := client.runCmd("cat", filePath)
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +127,7 @@ func (client *CommonClient) Cat(file string) (string, error) {
 
 // List ...
 func (client *CommonClient) List() (*lists, error) {
-	out, err := client.RunCmd("ls", "--xml", client.URLOrPath)
+	out, err := client.runCmd("ls", "--xml", client.URLOrPath)
 	if err != nil {
 		log.Println("error:", err)
 		return nil, err
@@ -136,23 +141,20 @@ func (client *CommonClient) List() (*lists, error) {
 	return ls, nil
 }
 
-
 // Diff ...
 func (client *CommonClient) Diff(start, end int) (string, error) {
 	r := fmt.Sprintf("%d:%d", start, end)
-	out, err := client.RunCmd("diff", "-r", r, client.URLOrPath)
+	out, err := client.runCmd("diff", "-r", r, client.URLOrPath)
 	if err != nil {
 		return "", err
 	}
 	return string(out), nil
 }
 
-
-
 // DiffSummary ...
 func (client *CommonClient) DiffSummary(start, end int) (*diffPath, error) {
 	r := fmt.Sprintf("%d:%d", start, end)
-	out, err := client.RunCmd("diff", "-r", r, client.URLOrPath, "--xml", "--summarize")
+	out, err := client.runCmd("diff", "-r", r, client.URLOrPath, "--xml", "--summarize")
 	if err != nil {
 		return nil, err
 	}

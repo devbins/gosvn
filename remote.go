@@ -22,7 +22,7 @@ func (remoteClient *RemoteClient) CheckOut(dir string) error {
 		return err
 	}
 
-	_, err = remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir)
+	_, err = remoteClient.runCmd("checkout", remoteClient.URLOrPath, dir)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int)
 		return err
 	}
 
-	_, err = remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir, "-r", strconv.Itoa(revision))
+	_, err = remoteClient.runCmd("checkout", remoteClient.URLOrPath, dir, "-r", strconv.Itoa(revision))
 	if err != nil {
 		return err
 	}
