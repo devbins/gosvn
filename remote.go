@@ -1,25 +1,53 @@
 package gosvn
 
 import (
-	"os/exec"
+	"strings"
+	"errors"
 )
 
-type remoteClient struct {
-	url      string
-	username string
-	password string
+type RemoteClient struct {
+	*CommonClient
+}
+
+// NewRemoteClient ...
+func NewRemoteClient(url, username, password string) *RemoteClient {
+	return &RemoteClient{CommonClient: NewCommonClient(url, username, password)}
 }
 
 // CheckOut ...
-func (this *remoteClient) CheckOut(dir string) error {
-	args := []string{"checkout", this.url, dir, "--username", this.username, "--password", this.password}
-	_, err := runcmd(args...)
-	return err
+func (remoteClient *RemoteClient) CheckOut(dir string) error {
+	err := verifyDir(dir)
+	if err != nil {
+		return err
+	}
+
+	_, err = remoteClient.RunCmd("checkout", remoteClient.URLOrPath, dir)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// run ...
-func runcmd(args ...string) ([]byte, error) {
-	cmd := exec.Command("svn", args...)
-	out, err := cmd.Output()
-	return out, err
+// CheckOutWithRevision ...
+func (remoteClient *RemoteClient) CheckOutWithRevision(dir string, revision int) error {
+	err := verifyDir(dir)
+	if err != nil {
+		return err
+	}
+
+	_, err = remoteClient.RunCmd("checkout", dir, "-r", string(revision), remoteClient.URLOrPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+// verifyDir ...
+func verifyDir(dir string) error {
+	if !strings.HasPrefix(dir, "/") {
+		err := errors.New("Checkout dir must start with /")
+		return err
+	}
+	return nil
 }
